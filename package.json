@@ -1,0 +1,45 @@
+{
+  "name": "@desert-ant-labs/emo",
+  "version": "1.0.0",
+  "description": "On-device emoji suggestions from text.",
+  "type": "module",
+  "main": "./dist/index.node.js",
+  "types": "./dist/index.node.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.node.d.ts",
+      "browser": "./dist/index.browser.js",
+      "node": "./dist/index.node.js",
+      "default": "./dist/index.browser.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "emoji",
+    "on-device",
+    "multilingual",
+    "text-classification"
+  ],
+  "license": "SEE LICENSE IN LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Desert-Ant-Labs/emo-js.git"
+  },
+  "homepage": "https://github.com/Desert-Ant-Labs/emo-js",
+  "engines": {
+    "node": ">=18"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}
