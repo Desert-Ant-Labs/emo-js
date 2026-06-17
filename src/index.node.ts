@@ -35,7 +35,13 @@ let modelPromise: Promise<EmoModel> | null = null;
  * (and cached) lazily on first call. Empty input returns `[]`.
  */
 export async function suggestions(text: string, limit = 3): Promise<EmoSuggestion[]> {
-  if (!modelPromise) modelPromise = load();
+  if (!modelPromise) {
+    // Don't cache a rejected load: clear the slot on failure so the next call retries.
+    modelPromise = load().catch((err) => {
+      modelPromise = null;
+      throw err;
+    });
+  }
   return (await modelPromise).suggestions(text, limit);
 }
 
