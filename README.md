@@ -18,7 +18,7 @@ const emoji = (await suggestions("犬の散歩", 1))[0]?.emoji; // "🐕"
 - Pure-JS inference (no ONNX/WASM runtime) — prediction is sub-millisecond
 - Suggests from a curated vocabulary of 236 task/calendar/message emojis
 - Supports 22 languages (incl. CJK, Arabic, Thai, Hindi, …)
-- Model (~7.8 MB) is fetched from the Hugging Face Hub at a **pinned revision**, then
+- Model (~4.7 MB, 4-bit) is fetched from the Hugging Face Hub at a **pinned revision**, then
   cached — to the **filesystem** on Node and to **Cache Storage** in the browser, so
   it loads once and runs offline after
 
