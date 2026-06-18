@@ -1,0 +1,10 @@
+{
+  "name": "emo-example",
+  "version": "1.0.0",
+  "description": "A tiny todo-list web app with on-device emoji suggestions from @desert-ant-labs/emo.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}
