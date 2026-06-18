@@ -17,7 +17,24 @@ export interface EmoMeta {
   sem_pad_index: number;
 }
 
-interface F32Tensor { data: Float32Array; rows: number; cols: number }
+// A weight tensor, either raw F32 or a 4-bit k-means palette kept packed in memory
+// (a U8 index per weight, 2 per byte) and decoded on access — ~8x less memory than
+// expanding to floats, for ~0.1ms more per inference.
+class Tensor {
+  constructor(
+    readonly rows: number,
+    readonly cols: number,
+    private readonly floats: Float32Array | null,
+    private readonly packed: Uint8Array | null,
+    private readonly palette: Float32Array | null,
+  ) {}
+  get(i: number): number {
+    const f = this.floats;
+    if (f !== null) return f[i];
+    const byte = this.packed![i >> 1];
+    return this.palette![(i & 1) ? (byte >> 4) & 0xf : byte & 0xf];
+  }
+}
 
 function erf(x: number): number {
   const t = 1 / (1 + 0.3275911 * Math.abs(x));
@@ -29,6 +46,7 @@ const gelu = (x: number) => 0.5 * x * (1 + erf(x / Math.SQRT2));
 // Minimal safetensors reader: u64 header length, JSON header, then raw tensor bytes.
 // Each weight is either raw F32, or a 4-bit k-means palette stored as a packed U8 index
 // tensor plus a "<name>.palette" F32 tensor (logical 2-D shape kept in __metadata__).
+// Palette weights stay packed and are decoded on access (see Tensor).
 function parseWeights(bytes: Uint8Array) {
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const headerLen = Number(dv.getBigUint64(0, true));
@@ -44,21 +62,13 @@ function parseWeights(bytes: Uint8Array) {
     return { shape: e.shape, bytes: out };
   };
   const f32 = (name: string): Float32Array => new Float32Array(slice(name).bytes.buffer);
-  const expand = (name: string): F32Tensor => {
+  const expand = (name: string): Tensor => {
     if (header[name + ".palette"]) {
       const [rows, cols] = (meta["shape." + name] as string).split(",").map(Number);
-      const N = rows * cols;
-      const packed = slice(name).bytes;
-      const palette = f32(name + ".palette");
-      const out = new Float32Array(N);
-      for (let i = 0; i < N; i++) {
-        const byte = packed[i >> 1];
-        out[i] = palette[(i & 1) ? (byte >> 4) & 0xf : byte & 0xf];
-      }
-      return { data: out, rows, cols };
+      return new Tensor(rows, cols, null, slice(name).bytes, f32(name + ".palette"));
     }
     const [rows, cols = 1] = slice(name).shape;
-    return { data: f32(name), rows, cols };
+    return new Tensor(rows, cols, f32(name), null, null);
   };
   return {
     embed: expand("embed"), sem: expand("sem"), importance: expand("importance"),
@@ -91,9 +101,9 @@ export class EmoModel {
     for (let i = 0; i < f.buckets.length; i++) {
       const im = f.importance[i];
       for (let k = 0; k < this.meta.n_hashes; k++) {
-        const w = importance.data[im * importance.cols + k] * f.signs[i][k];
+        const w = importance.get(im * importance.cols + k) * f.signs[i][k];
         const base = f.buckets[i][k] * ngDim;
-        for (let c = 0; c < ngDim; c++) ng[c] += w * embed.data[base + c];
+        for (let c = 0; c < ngDim; c++) ng[c] += w * embed.get(base + c);
       }
     }
     const fcount = Math.max(1, f.buckets.length);
@@ -106,7 +116,7 @@ export class EmoModel {
     for (const id of ids) {
       if (id >= sem.rows) continue;
       const base = id * semDim;
-      for (let c = 0; c < semDim; c++) sv[c] += sem.data[base + c];
+      for (let c = 0; c < semDim; c++) sv[c] += sem.get(base + c);
     }
     for (let c = 0; c < semDim; c++) sv[c] /= ids.length;
     let norm = 0;
@@ -122,9 +132,9 @@ export class EmoModel {
     const hid = w1.rows;
     const h = new Float32Array(hid);
     for (let o = 0; o < hid; o++) {
-      let acc = b1.data[o];
+      let acc = b1.get(o);
       const base = o * inDim;
-      for (let i = 0; i < inDim; i++) acc += w1.data[base + i] * x[i];
+      for (let i = 0; i < inDim; i++) acc += w1.get(base + i) * x[i];
       h[o] = gelu(acc);
     }
 
@@ -132,9 +142,9 @@ export class EmoModel {
     const logits = new Float32Array(n);
     let maxLogit = -Infinity;
     for (let o = 0; o < n; o++) {
-      let acc = b2.data[o];
+      let acc = b2.get(o);
       const base = o * hid;
-      for (let i = 0; i < hid; i++) acc += w2.data[base + i] * h[i];
+      for (let i = 0; i < hid; i++) acc += w2.get(base + i) * h[i];
       logits[o] = acc;
       if (acc > maxLogit) maxLogit = acc;
     }
