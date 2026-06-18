@@ -3,9 +3,9 @@ import { createEmo, EmoModel, type EmoMeta } from "./model.js";
 export const DEFAULT_HOST = "https://huggingface.co";
 export const DEFAULT_REPO = "desert-ant-labs/emo";
 /** Pinned revision of the model repo (a commit SHA). */
-export const DEFAULT_REVISION = "e6a62971f6da99bbefdc919482450364e9a0c454";
+export const DEFAULT_REVISION = "40fce1ec891864c18558599eb532e6ff0b1cbd1c";
 
-const FILES = ["emo_weights.bin", "emo_tokenizer.bin", "emo_meta.json"] as const;
+const FILES = ["emo.safetensors", "emo_tokenizer.bin", "emo_meta.json"] as const;
 
 /** Resolution + caching configuration (mutate the exported `env` to change defaults). */
 export interface EmoEnv {

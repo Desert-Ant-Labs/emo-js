@@ -26,30 +26,30 @@ function erf(x: number): number {
 }
 const gelu = (x: number) => 0.5 * x * (1 + erf(x / Math.SQRT2));
 
+// Minimal safetensors reader: u64 header length, JSON header, then raw tensor bytes.
+// Each weight is either raw F32, or a 4-bit k-means palette stored as a packed U8 index
+// tensor plus a "<name>.palette" F32 tensor (logical 2-D shape kept in __metadata__).
 function parseWeights(bytes: Uint8Array) {
-  if (bytes[0] !== 0x45 || bytes[1] !== 0x4d || bytes[2] !== 0x57 || bytes[3] !== 0x31) {
-    throw new Error("bad weights file");
-  }
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const headerLen = dv.getUint32(4, true);
+  const headerLen = Number(dv.getBigUint64(0, true));
   const header = JSON.parse(new TextDecoder().decode(bytes.subarray(8, 8 + headerLen)));
   const dataStart = 8 + headerLen;
-  const copy = (start: number, len: number): ArrayBuffer => {
-    const out = new Uint8Array(len);
-    out.set(bytes.subarray(start, start + len));
-    return out.buffer;
+  const meta = header.__metadata__ ?? {};
+  const slice = (name: string): { shape: number[]; bytes: Uint8Array } => {
+    const e = header[name];
+    if (!e) throw new Error(`emo: missing tensor ${name}`);
+    const [a, b] = e.data_offsets;
+    const out = new Uint8Array(b - a);
+    out.set(bytes.subarray(dataStart + a, dataStart + b));
+    return { shape: e.shape, bytes: out };
   };
-  // Decode any stored tensor (raw f32, or per-tensor 4-bit k-means palette) to f32.
+  const f32 = (name: string): Float32Array => new Float32Array(slice(name).bytes.buffer);
   const expand = (name: string): F32Tensor => {
-    const h = header[name];
-    const [rows, cols = 1] = h.shape;
-    const N = rows * cols;
-    if (!h.q || h.q === "f32") {
-      return { data: new Float32Array(copy(dataStart + h.off, N * 4)), rows, cols };
-    }
-    if (h.q === "pal4") {
-      const packed = new Uint8Array(copy(dataStart + h.off, (N + 1) >> 1));
-      const palette = new Float32Array(copy(dataStart + h.paletteOff, 16 * 4));
+    if (header[name + ".palette"]) {
+      const [rows, cols] = (meta["shape." + name] as string).split(",").map(Number);
+      const N = rows * cols;
+      const packed = slice(name).bytes;
+      const palette = f32(name + ".palette");
       const out = new Float32Array(N);
       for (let i = 0; i < N; i++) {
         const byte = packed[i >> 1];
@@ -57,7 +57,8 @@ function parseWeights(bytes: Uint8Array) {
       }
       return { data: out, rows, cols };
     }
-    throw new Error(`unsupported weight encoding: ${h.q}`);
+    const [rows, cols = 1] = slice(name).shape;
+    return { data: f32(name), rows, cols };
   };
   return {
     embed: expand("embed"), sem: expand("sem"), importance: expand("importance"),

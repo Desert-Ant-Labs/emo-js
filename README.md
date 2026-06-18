@@ -32,7 +32,7 @@ npm install @desert-ant-labs/emo
 
 Model files are fetched from the Hugging Face Hub
 ([`desert-ant-labs/emo`](https://huggingface.co/desert-ant-labs/emo)) at a pinned
-revision and cached. The first call downloads `emo_weights.bin`, `emo_tokenizer.bin`,
+revision and cached. The first call downloads `emo.safetensors`, `emo_tokenizer.bin`,
 and `emo_meta.json`; subsequent calls read from the cache.
 
 - **Node**: `suggestions()` works zero-config; files cache under `~/.cache/emo`.
