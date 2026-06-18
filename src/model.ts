@@ -18,7 +18,25 @@ export interface EmoMeta {
 }
 
 interface F32Tensor { data: Float32Array; rows: number; cols: number }
-interface Int8Tensor { data: Int8Array; scale: Float32Array; rows: number; cols: number }
+interface QTensor { data: Int8Array | Uint8Array; scale: Float32Array; rows: number; cols: number; bits: number }
+
+function dequantRow(t: QTensor, r: number, out: Float32Array): void {
+  const s = t.scale[r];
+  if (t.bits === 8) {
+    const base = r * t.cols;
+    const d = t.data as Int8Array;
+    for (let c = 0; c < t.cols; c++) out[c] = d[base + c] * s;
+  } else {
+    const base = r * (t.cols >> 1);
+    const d = t.data as Uint8Array;
+    for (let c = 0; c < t.cols; c++) {
+      const byte = d[base + (c >> 1)];
+      let n = (c & 1) ? (byte >> 4) & 0xf : byte & 0xf;
+      if (n >= 8) n -= 16;
+      out[c] = n * s;
+    }
+  }
+}
 
 function erf(x: number): number {
   const t = 1 / (1 + 0.3275911 * Math.abs(x));
@@ -45,17 +63,19 @@ function parseWeights(bytes: Uint8Array) {
     const [rows, cols = 1] = h.shape;
     return { data: new Float32Array(copy(dataStart + h.off, rows * cols * 4)), rows, cols };
   };
-  const int8 = (name: string): Int8Tensor => {
+  const quant = (name: string): QTensor => {
     const h = header[name];
     const [rows, cols] = h.shape;
+    const bits = h.q === "int4" ? 4 : 8;
+    const raw = copy(dataStart + h.off, bits === 4 ? rows * (cols >> 1) : rows * cols);
     return {
-      data: new Int8Array(copy(dataStart + h.off, rows * cols)),
+      data: bits === 4 ? new Uint8Array(raw) : new Int8Array(raw),
       scale: new Float32Array(copy(dataStart + h.scaleOff, rows * 4)),
-      rows, cols,
+      rows, cols, bits,
     };
   };
   return {
-    embed: int8("embed"), sem: int8("sem"), importance: f32("importance"),
+    embed: quant("embed"), sem: quant("sem"), importance: f32("importance"),
     w1: f32("w1"), b1: f32("b1"), w2: f32("w2"), b2: f32("b2"),
   };
 }
@@ -81,15 +101,14 @@ export class EmoModel {
     const semDim = sem.cols;
 
     const ng = new Float32Array(ngDim);
+    const erow = new Float32Array(ngDim);
     const f = ngramEncode(trimmed, this.meta.n_buckets, this.meta.n_hashes, this.meta.n_importance, this.maxLen);
     for (let i = 0; i < f.buckets.length; i++) {
       const im = f.importance[i];
       for (let k = 0; k < this.meta.n_hashes; k++) {
         const w = importance.data[im * importance.cols + k] * f.signs[i][k];
-        const b = f.buckets[i][k];
-        const scale = embed.scale[b];
-        const base = b * ngDim;
-        for (let c = 0; c < ngDim; c++) ng[c] += w * (embed.data[base + c] * scale);
+        dequantRow(embed, f.buckets[i][k], erow);
+        for (let c = 0; c < ngDim; c++) ng[c] += w * erow[c];
       }
     }
     const fcount = Math.max(1, f.buckets.length);
@@ -99,11 +118,11 @@ export class EmoModel {
     if (ids.length > this.maxLen) ids = ids.slice(0, this.maxLen);
     if (ids.length === 0) ids = [this.meta.sem_pad_index];
     const sv = new Float32Array(semDim);
+    const srow = new Float32Array(semDim);
     for (const id of ids) {
       if (id >= sem.rows) continue;
-      const scale = sem.scale[id];
-      const base = id * semDim;
-      for (let c = 0; c < semDim; c++) sv[c] += sem.data[base + c] * scale;
+      dequantRow(sem, id, srow);
+      for (let c = 0; c < semDim; c++) sv[c] += srow[c];
     }
     for (let c = 0; c < semDim; c++) sv[c] /= ids.length;
     let norm = 0;
