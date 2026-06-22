@@ -1,0 +1,21 @@
+{
+  "name": "emo-example-rn",
+  "version": "1.0.0",
+  "description": "An Expo / React Native app with on-device emoji suggestions from @desert-ant-labs/emo, loaded fully offline from bundled assets.",
+  "type": "module",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android"
+  },
+  "dependencies": {
+    "@desert-ant-labs/emo": "*",
+    "expo": "*",
+    "expo-asset": "*",
+    "expo-file-system": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

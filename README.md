@@ -63,6 +63,25 @@ and `emo_meta.json`; subsequent calls read from the cache.
   To run fully offline, ship the files yourself and point at a folder with
   `env.localModelPath` (or `EMO_LOCAL_PATH`).
 - **Browser**: same API; files cache in Cache Storage.
+- **React Native**: same API; the `react-native` build is selected automatically by
+  Metro. By default the model is held in memory for the session (re-fetched after a
+  cold start). To persist across launches, set `env.cache` to a filesystem-backed
+  cache built from the app's own `expo-file-system` (keeping this package
+  dependency-free), or skip the download entirely by resolving bundled assets through
+  `env.readLocal`. Inference is pure JS, so it needs no native module; on RN older
+  than ~0.74 add a `TextDecoder` polyfill.
+
+```ts
+// React Native: persist the model across launches via expo-file-system
+import * as FileSystem from "expo-file-system";
+import { env, suggestions, expoFileSystemCache } from "@desert-ant-labs/emo";
+
+env.cache = expoFileSystemCache(FileSystem); // optional; defaults to in-memory
+
+// or ship the files as bundled assets and never hit the network:
+// env.readLocal = async (name) => /* return Uint8Array for `name`, or null */;
+await suggestions("walk the dog", 1); // [{ emoji: "🐕", ... }]
+```
 
 ```ts
 import { env, load, suggestions } from "@desert-ant-labs/emo";
@@ -100,6 +119,10 @@ empty input returns `[]`. `EmoModel.suggestions` is synchronous once loaded.
 [`examples/EmoExample`](examples/EmoExample) is a small todo-list web app that predicts an
 emoji for each task on-device. Run it with `node server.js` from that folder and open
 <http://localhost:5173>.
+
+[`examples/EmoExampleRN`](examples/EmoExampleRN) is an Expo / React Native app that does the
+same on a phone, loading the model fully offline from bundled assets (no network). Run it
+with `npx expo start` from that folder.
 
 ## Model
 

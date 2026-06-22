@@ -1,0 +1,8 @@
+node_modules/
+.expo/
+dist/
+
+# Bundled model files (download with `hf download` — see assets/README.md)
+assets/emo.safetensors
+assets/emo_tokenizer.bin
+assets/emo_meta.json
