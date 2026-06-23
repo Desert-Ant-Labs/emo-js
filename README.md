@@ -11,6 +11,7 @@ const results = await suggestions("Pay my bills");
 // [{ emoji: "💰", confidence: 0.62 }, ...]
 
 const emoji = (await suggestions("犬の散歩", 1))[0]?.emoji; // "🐕"
+const toned = (await suggestions("go for a run", 1, { skinTone: "medium" }))[0]?.emoji; // "🏃🏽"
 ```
 
 ## Features
@@ -80,7 +81,7 @@ emo.suggestions("book a flight to Tokyo", 1)[0]?.emoji; // "✈️"
 ## API
 
 ```ts
-export function suggestions(text: string, limit?: number): Promise<EmoSuggestion[]>;
+export function suggestions(text: string, limit?: number, options?: EmoSuggestionOptions): Promise<EmoSuggestion[]>;
 export function load(options?: Partial<EmoEnv>): Promise<EmoModel>;
 export function createEmo(buffers: { weights; tokenizer; meta }): EmoModel; // raw buffers
 export const env: EmoEnv;
@@ -90,10 +91,16 @@ export interface EmoSuggestion {
   emoji: string;
   confidence: number;
 }
+
+export interface EmoSuggestionOptions {
+  skinTone?: EmojiSkinTone; // default: "default"
+}
+
+export type EmojiSkinTone = "default" | "light" | "mediumLight" | "medium" | "mediumDark" | "dark";
 ```
 
-`suggestions(text, limit = 3)` returns up to `limit` emojis, most likely first;
-empty input returns `[]`. `EmoModel.suggestions` is synchronous once loaded.
+`suggestions(text, limit = 3, options)` returns up to `limit` emojis, most likely first;
+empty input returns `[]`. `skinTone` post-processes skin-tone-capable emoji; the default is `"default"` (no modifier). `EmoModel.suggestions` is synchronous once loaded.
 
 ## Example
 

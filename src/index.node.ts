@@ -4,8 +4,10 @@ import { join } from "node:path";
 import { fsCache, localReader } from "./cache-node.js";
 import { DEFAULT_HOST, DEFAULT_REPO, DEFAULT_REVISION, type EmoEnv, loadModel } from "./hub.js";
 import { type EmoModel, type EmoSuggestion } from "./model.js";
+import { type EmoSuggestionOptions } from "./skin-tone.js";
 
 export { createEmo, EmoModel, type EmoSuggestion, type EmoMeta } from "./model.js";
+export { applyEmojiSkinTone, type EmojiSkinTone, type EmoSuggestionOptions } from "./skin-tone.js";
 export { loadModel, type EmoEnv, type FileCache } from "./hub.js";
 
 /** Loading configuration. Mutate before the first call, or pass overrides to {@link load}. */
@@ -34,7 +36,7 @@ let modelPromise: Promise<EmoModel> | null = null;
  * Returns emoji suggestions for a phrase, most likely first. The model is loaded
  * (and cached) lazily on first call. Empty input returns `[]`.
  */
-export async function suggestions(text: string, limit = 3): Promise<EmoSuggestion[]> {
+export async function suggestions(text: string, limit = 3, options: EmoSuggestionOptions = {}): Promise<EmoSuggestion[]> {
   if (!modelPromise) {
     // Don't cache a rejected load: clear the slot on failure so the next call retries.
     modelPromise = load().catch((err) => {
@@ -42,7 +44,7 @@ export async function suggestions(text: string, limit = 3): Promise<EmoSuggestio
       throw err;
     });
   }
-  return (await modelPromise).suggestions(text, limit);
+  return (await modelPromise).suggestions(text, limit, options);
 }
 
 /** Clears the memoized model so the next {@link suggestions} call re-reads `env`. */
