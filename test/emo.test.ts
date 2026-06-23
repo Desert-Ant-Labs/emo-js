@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { load, type EmoModel } from "../src/index.node.js";
+import { applyEmojiSkinTone, load, type EmoModel } from "../src/index.node.js";
 
 // Offline: load from local files so tests don't need network or a token.
 const fixtures = fileURLToPath(new URL("../data", import.meta.url));
@@ -42,6 +42,13 @@ test("ranking", offline, () => {
 
 test("empty input", offline, () => {
   assert.deepEqual(model.suggestions("   "), []);
+});
+
+test("skin tone postprocessing", () => {
+  assert.equal(applyEmojiSkinTone("🏃", "medium"), "🏃🏽");
+  assert.equal(applyEmojiSkinTone("🧑‍🍳", "dark"), "🧑🏿‍🍳");
+  assert.equal(applyEmojiSkinTone("✍️", "light"), "✍🏻");
+  assert.equal(applyEmojiSkinTone("🐕", "medium"), "🐕");
 });
 
 test("hub fetch + cache", { skip: process.env.HF_TOKEN ? false : "no HF_TOKEN" }, async () => {

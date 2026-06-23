@@ -1,4 +1,7 @@
+import { applyEmojiSkinTone, type EmoSuggestionOptions } from "./skin-tone.js";
 import { ngramEncode, SemTokenizer } from "./tokenizer.js";
+
+export { applyEmojiSkinTone, type EmojiSkinTone, type EmoSuggestionOptions } from "./skin-tone.js";
 
 /** A single emoji suggestion. */
 export interface EmoSuggestion {
@@ -88,7 +91,7 @@ export class EmoModel {
   }
 
   /** Returns up to `limit` emoji suggestions, most likely first. */
-  suggestions(text: string, limit = 3): EmoSuggestion[] {
+  suggestions(text: string, limit = 3, options: EmoSuggestionOptions = {}): EmoSuggestion[] {
     const trimmed = text.trim();
     if (!trimmed) return [];
 
@@ -153,7 +156,11 @@ export class EmoModel {
 
     const labels = this.meta.labels;
     const order = Array.from({ length: n }, (_, i) => i).sort((a, b) => logits[b] - logits[a]);
-    return order.slice(0, Math.max(0, limit)).map((i) => ({ emoji: labels[i], confidence: logits[i] / sum }));
+    const skinTone = options.skinTone ?? "default";
+    return order.slice(0, Math.max(0, limit)).map((i) => ({
+      emoji: applyEmojiSkinTone(labels[i], skinTone),
+      confidence: logits[i] / sum,
+    }));
   }
 }
 
