@@ -1,7 +1,7 @@
 # @desert-ant-labs/emo
 
 On-device emoji suggestions from text. Suggests the best-matching emoji for short
-tasks, calendar entries, notes, or message drafts across **22 languages** — fully
+tasks, calendar entries, notes, or message drafts across **23 languages** — fully
 in-process, no inference runtime.
 
 ```ts
@@ -18,7 +18,7 @@ const toned = (await suggestions("go for a run", 1, { skinTone: "medium" }))[0]?
 
 - Pure-JS inference (no ONNX/WASM runtime) — prediction is sub-millisecond
 - Suggests from a data-driven vocabulary of ~300 task/calendar/message emojis
-- Supports 22 languages (incl. CJK, Arabic, Thai, Hindi, …)
+- Supports 23 languages (incl. CJK, Arabic, Thai, Hindi, …)
 - Model (~5.0 MB, 4-bit palettized) is fetched from the Hugging Face Hub at a **pinned revision**, then
   cached — to the **filesystem** on Node and to **Cache Storage** in the browser, so
   it loads once and runs offline after
