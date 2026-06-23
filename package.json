@@ -1,18 +1,36 @@
 {
   "name": "@desert-ant-labs/emo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "On-device emoji suggestions from text.",
   "type": "module",
   "main": "./dist/index.node.js",
   "types": "./dist/index.node.d.ts",
   "exports": {
     ".": {
-      "browser": { "types": "./dist/index.browser.d.ts", "default": "./dist/index.browser.js" },
-      "worker": { "types": "./dist/index.browser.d.ts", "default": "./dist/index.browser.js" },
-      "workerd": { "types": "./dist/index.browser.d.ts", "default": "./dist/index.browser.js" },
-      "edge-light": { "types": "./dist/index.browser.d.ts", "default": "./dist/index.browser.js" },
-      "node": { "types": "./dist/index.node.d.ts", "default": "./dist/index.node.js" },
-      "default": { "types": "./dist/index.node.d.ts", "default": "./dist/index.node.js" }
+      "browser": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
+      "worker": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
+      "workerd": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
+      "edge-light": {
+        "types": "./dist/index.browser.d.ts",
+        "default": "./dist/index.browser.js"
+      },
+      "node": {
+        "types": "./dist/index.node.d.ts",
+        "default": "./dist/index.node.js"
+      },
+      "default": {
+        "types": "./dist/index.node.d.ts",
+        "default": "./dist/index.node.js"
+      }
     },
     "./core": {
       "types": "./dist/model.d.ts",
