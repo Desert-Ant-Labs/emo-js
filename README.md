@@ -1,7 +1,7 @@
 # @desert-ant-labs/emo
 
 On-device emoji suggestions from text. Suggests the best-matching emoji for short
-tasks, calendar entries, notes, or message drafts across **23 languages** — fully
+tasks, calendar entries, notes, or message drafts across **23 languages**, fully
 in-process, no inference runtime.
 
 ```ts
@@ -16,11 +16,11 @@ const toned = (await suggestions("go for a run", 1, { skinTone: "medium" }))[0]?
 
 ## Features
 
-- Pure-JS inference (no ONNX/WASM runtime) — prediction is sub-millisecond
+- Pure-JS inference (no ONNX/WASM runtime); prediction is sub-millisecond
 - Suggests from a data-driven vocabulary of ~300 task/calendar/message emojis
 - Supports 23 languages (incl. CJK, Arabic, Thai, Hindi, …)
 - Model (~5.0 MB, 4-bit palettized) is fetched from the Hugging Face Hub at a **pinned revision**, then
-  cached — to the **filesystem** on Node and to **Cache Storage** in the browser, so
+  cached, to the **filesystem** on Node and to **Cache Storage** in the browser, so
   it loads once and runs offline after
 
 ## Install
@@ -31,8 +31,8 @@ npm install @desert-ant-labs/emo
 
 ## Importing
 
-Pure ESM and fully tree-shakeable. The **same import works everywhere** — Node, bundlers,
-browsers, and edge/worker runtimes — the right build is selected automatically:
+Pure ESM and fully tree-shakeable. The **same import works everywhere** (Node, bundlers,
+browsers, and edge/worker runtimes); the right build is selected automatically:
 
 ```ts
 import { suggestions } from "@desert-ant-labs/emo";
@@ -42,7 +42,7 @@ CommonJS consumers use dynamic import (`const { suggestions } = await import("@d
 native `require()` works on Node ≥ 22.12.
 
 **Minimal footprint / bring-your-own-bytes.** If you load the model files yourself, import the
-hub-free core from `@desert-ant-labs/emo/core` — only the ~6 KB inference engine, with zero
+hub-free core from `@desert-ant-labs/emo/core`, only the ~6 KB inference engine, with zero
 network/filesystem code:
 
 ```ts
@@ -114,4 +114,4 @@ Published at [`desert-ant-labs/emo`](https://huggingface.co/desert-ant-labs/emo)
 
 ## License
 
-See [`LICENSE.md`](LICENSE.md) — Desert Ant Labs Source-Available License v1.0. Free for commercial use up to 100,000 MAU per Model; <licensing@desertant.ai> above that.
+See [`LICENSE.md`](LICENSE.md). Desert Ant Labs Source-Available License v1.0. Free for commercial use up to 100,000 MAU per Model; contact <licensing@desertant.ai> above that.
