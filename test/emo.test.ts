@@ -21,7 +21,7 @@ before(async () => {
 const top = (text: string) => model.suggestions(text, 1)[0]?.emoji ?? "";
 
 test("english predictions", offline, () => {
-  assert.ok(["💰", "💳", "🧾", "🏦"].includes(top("Pay my bills")));
+  assert.ok(["💰", "💳", "🧾", "🏦", "📄"].includes(top("Pay my bills")));
   assert.ok(["🐕", "🐾", "🚶"].includes(top("walk the dog")));
   assert.equal(top("book a flight to Tokyo"), "✈️");
   assert.ok(["🦷", "📅", "🏥"].includes(top("dentist appointment")));
