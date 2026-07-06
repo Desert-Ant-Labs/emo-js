@@ -4,7 +4,7 @@ export const DEFAULT_HOST = "https://huggingface.co";
 export const DEFAULT_REPO = "desert-ant-labs/emo";
 /** Pinned revision of the model repo. A tag (not a bare commit SHA) so it
  * survives history rewrites/squashes on the model repo. */
-export const DEFAULT_REVISION = "v0.4.0";
+export const DEFAULT_REVISION = "v0.5.0";
 
 const FILES = ["emo.safetensors", "emo_tokenizer.bin", "emo_meta.json"] as const;
 
