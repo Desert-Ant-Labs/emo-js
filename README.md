@@ -17,7 +17,7 @@ const toned = (await suggestions("go for a run", 1, { skinTone: "medium" }))[0]?
 ## Features
 
 - Pure-JS inference (no ONNX/WASM runtime); prediction is sub-millisecond
-- Suggests from a data-driven vocabulary of ~500 task/calendar/message emojis
+- Suggests from a curated vocabulary of ~800 everyday emojis (task, message, and concrete nouns)
 - Supports 23 languages (incl. CJK, Arabic, Thai, Hindi, …)
 - Model (~5.0 MB, 4-bit palettized) is fetched from the Hugging Face Hub at a **pinned revision**, then
   cached, to the **filesystem** on Node and to **Cache Storage** in the browser, so

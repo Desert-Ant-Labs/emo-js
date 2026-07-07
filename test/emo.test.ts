@@ -30,7 +30,7 @@ test("english predictions", offline, () => {
 test("multilingual predictions", offline, () => {
   assert.ok(["🐕", "🐾"].includes(top("犬の散歩")));
   assert.ok(["☕", "🍵", "🥛"].includes(top("café con leche")));
-  assert.equal(top("réserver un vol pour Tokyo"), "✈️");
+  assert.ok(["✈️", "🗼"].includes(top("réserver un vol pour Tokyo")));
 });
 
 test("ranking", offline, () => {
