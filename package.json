@@ -51,9 +51,15 @@
   },
   "keywords": [
     "emoji",
+    "emoji-suggestion",
+    "emoji-prediction",
+    "text-to-emoji",
+    "emoji-autocomplete",
     "on-device",
+    "offline",
     "multilingual",
-    "text-classification"
+    "typescript",
+    "keyboard"
   ],
   "license": "SEE LICENSE IN LICENSE.md",
   "repository": {

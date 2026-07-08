@@ -1,8 +1,13 @@
 # @desert-ant-labs/emo
 
+**On-device emoji suggestion for Node and the browser. TypeScript-native, offline, multilingual, no inference runtime.**
+
 On-device emoji suggestions from text. Suggests the best-matching emoji for short
 tasks, calendar entries, notes, or message drafts across **23 languages**, fully
-in-process, no inference runtime.
+in-process, no inference runtime. Emo does emoji prediction (text-to-emoji), useful
+for a keyboard, an autocomplete, or any text field. It runs in TypeScript and
+JavaScript, in Node and in the browser. Emo suggests emoji from text; it is not an
+emoji picker.
 
 ```ts
 import { suggestions } from "@desert-ant-labs/emo";
@@ -111,6 +116,14 @@ emoji for each task on-device. Run it with `node server.js` from that folder and
 ## Model
 
 Published at [`desert-ant-labs/emo`](https://huggingface.co/desert-ant-labs/emo) on Hugging Face.
+
+## Other platforms
+
+Same model, native on each platform:
+
+- [`emo-swift`](https://github.com/Desert-Ant-Labs/emo-swift): Swift for iOS and macOS
+- [`emo-kotlin`](https://github.com/Desert-Ant-Labs/emo-kotlin): Kotlin for Android and the JVM
+- Model weights and card: [`desert-ant-labs/emo`](https://huggingface.co/desert-ant-labs/emo)
 
 ## License
 
