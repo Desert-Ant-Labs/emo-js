@@ -1,6 +1,6 @@
 {
   "name": "@desert-ant-labs/emo",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "On-device emoji suggestions from text.",
   "type": "module",
   "main": "./dist/index.node.js",
@@ -75,7 +75,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@desert-ant-labs/desert-ant-web": "^0.1.0"
+    "@desert-ant-labs/desert-ant-web": "^0.2.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18",
