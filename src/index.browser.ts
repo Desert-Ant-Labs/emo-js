@@ -1,3 +1,5 @@
+import { initUsage, type UsageClient } from "@desert-ant-labs/desert-ant-web";
+
 import { webCache } from "./cache-web.js";
 import { DEFAULT_HOST, DEFAULT_REPO, DEFAULT_REVISION, type EmoEnv, loadModel } from "./hub.js";
 import { type EmoModel, type EmoSuggestion } from "./model.js";
@@ -16,10 +18,25 @@ export const env: EmoEnv = {
   useCache: true,
 };
 
+const USAGE_KEY = "dal_lEL3EuFU2eh8IRTH8RW9pV9czYn0TrCk";
+
+let usage: UsageClient | null = null;
+
+function instrument(model: EmoModel): EmoModel {
+  const suggestions = model.suggestions.bind(model);
+  model.suggestions = (text, limit, options) => {
+    usage ??= initUsage({ key: USAGE_KEY });
+    const out = suggestions(text, limit, options);
+    usage.recordCall();
+    return out;
+  };
+  return model;
+}
+
 /** Loads the model from the Hugging Face Hub (cached in Cache Storage). */
 export async function load(options: Partial<EmoEnv> = {}): Promise<EmoModel> {
   const e = { ...env, ...options };
-  return loadModel(e, e.useCache ? webCache() : null);
+  return instrument(await loadModel(e, e.useCache ? webCache() : null));
 }
 
 let modelPromise: Promise<EmoModel> | null = null;
