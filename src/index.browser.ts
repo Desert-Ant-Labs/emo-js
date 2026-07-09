@@ -18,14 +18,12 @@ export const env: EmoEnv = {
   useCache: true,
 };
 
-const USAGE_KEY = "dal_lEL3EuFU2eh8IRTH8RW9pV9czYn0TrCk";
-
 let usage: UsageClient | null = null;
 
-function instrument(model: EmoModel): EmoModel {
+function instrument(model: EmoModel, usageKey?: string): EmoModel {
   const suggestions = model.suggestions.bind(model);
   model.suggestions = (text, limit, options) => {
-    usage ??= initUsage({ key: USAGE_KEY });
+    usage ??= initUsage({ key: usageKey });
     const out = suggestions(text, limit, options);
     usage.recordCall();
     return out;
@@ -34,9 +32,9 @@ function instrument(model: EmoModel): EmoModel {
 }
 
 /** Loads the model from the Hugging Face Hub (cached in Cache Storage). */
-export async function load(options: Partial<EmoEnv> = {}): Promise<EmoModel> {
+export async function load(options: Partial<EmoEnv> & { usageKey?: string } = {}): Promise<EmoModel> {
   const e = { ...env, ...options };
-  return instrument(await loadModel(e, e.useCache ? webCache() : null));
+  return instrument(await loadModel(e, e.useCache ? webCache() : null), options.usageKey);
 }
 
 let modelPromise: Promise<EmoModel> | null = null;

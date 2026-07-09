@@ -1,6 +1,6 @@
 {
   "name": "@desert-ant-labs/emo",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "On-device emoji suggestions from text.",
   "type": "module",
   "main": "./dist/index.node.js",
